@@ -1,3 +1,9 @@
+import { subdomains as cognitiveQuestions } from '../data/cognitiveQuestions';
+import { subdomains as mentalQuestions } from '../data/mentalQuestions';
+import { subdomains as physicalQuestions } from '../data/physicalQuestions';
+// Assuming biomarkersQuestions.js will be created. If not, it will be handled.
+// import { subdomains as biomarkersQuestions } from '../data/biomarkersQuestions';
+
 export const findUserById = (id) => {
   try {
     const list = JSON.parse(localStorage.getItem('usersSeen') || '[]');
@@ -48,23 +54,93 @@ export const getDomainReports = (userId) => {
   }
 };
 
+// Helper to get all questions for a domain
+const getQuestionsForDomain = (domain) => {
+  let questionData;
+  switch (domain) {
+    case 'cognitive':
+      questionData = cognitiveQuestions;
+      break;
+    case 'mental':
+      questionData = mentalQuestions;
+      break;
+    case 'physical':
+      questionData = physicalQuestions;
+      break;
+    // case 'biomarkers':
+    //   questionData = biomarkersQuestions;
+    //   break;
+    default:
+      return [];
+  }
+  // Flatten the subdomains into a single list of questions
+  return questionData.flatMap(subdomain => subdomain.items || []);
+};
+
 export const calculateDomainScore = (domain, reports) => {
   const domainReport = reports
     .filter(r => r.domain === domain)
     .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-  
-  if (!domainReport) return null;
-  
-  let score = Math.floor(Math.random() * 20) + 70;
-  
-  if (domainReport.answers) {
-    const answerCount = Object.keys(domainReport.answers).length;
-    if (answerCount > 0) {
-      score = Math.min(95, 70 + Math.floor(answerCount * 2));
-    }
+
+  if (!domainReport || !domainReport.answers) {
+    return null; // No report or no answers, so no score
   }
-  
-  return score;
+
+  const questions = getQuestionsForDomain(domain);
+  const userAnswers = domainReport.answers;
+  let totalScore = 0;
+
+  // --- START: Special exception for Mental Health scoring ---
+  const mentalWellbeingCodes = ['mh201', 'mh202', 'mh204', 'mh205', 'mh208', 'mh209', 'mh210', 'mh206', 'mh207'];
+  const mh201Answer = userAnswers['mh201'];
+  const isMentalHealthSkip = domain === 'mental' && mh201Answer?.toLowerCase() === 'no';
+
+  if (isMentalHealthSkip) {
+    // Find all questions related to mental well-being
+    const mentalWellbeingQuestions = questions.filter(q => mentalWellbeingCodes.includes(q.code));
+    // Add the sum of their weights directly to the score
+    const bonusScore = mentalWellbeingQuestions.reduce((sum, q) => sum + (q.weight || 0), 0);
+    totalScore += bonusScore;
+  }
+  // --- END: Special exception ---
+
+  // Loop through every question for the domain
+  for (const question of questions) {
+    // If the mental health exception was applied, skip those questions in the loop
+    if (isMentalHealthSkip && mentalWellbeingCodes.includes(question.code)) {
+      continue;
+    }
+
+    // Ensure the question has a code, benchmark, and weight to be scored
+    if (!question.code || question.benchmark === undefined || question.weight === undefined) {
+      continue;
+    }
+
+    const userAnswer = userAnswers[question.code];
+    let questionScore = 0; // Default score is 0 (incorrect)
+
+    // Check if user provided a valid answer
+    if (userAnswer !== undefined && userAnswer !== null && userAnswer !== '') {
+      // For numeric benchmarks (e.g., benchmark: 8)
+      if (typeof question.benchmark === 'number') {
+        const numericAnswer = parseFloat(userAnswer);
+        if (!isNaN(numericAnswer) && numericAnswer >= question.benchmark) {
+          questionScore = 1; // Score is 1 if answer is >= benchmark
+        }
+      }
+      // For string benchmarks (e.g., benchmark: 'No')
+      else if (typeof question.benchmark === 'string') {
+        if (String(userAnswer).trim().toLowerCase() === question.benchmark.trim().toLowerCase()) {
+          questionScore = 1; // Score is 1 if answer matches benchmark
+        }
+      }
+    }
+
+    // Add the weighted score for this question to the total
+    totalScore += questionScore * question.weight;
+  }
+
+  return Math.round(totalScore);
 };
 
 export const generateSuggestions = (scores) => {
@@ -105,4 +181,3 @@ export const saveUser = (userId, userName) => {
     localStorage.setItem(key, JSON.stringify(list));
   } catch (_) {}
 };
-
