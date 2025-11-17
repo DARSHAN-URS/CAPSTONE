@@ -2,16 +2,16 @@ export const subdomains = [
     {
       title: 'Blood Pressure',
       items: [
-        {  text: 'Systolic Reading', inputType: 'text' },
-        {  text: 'Diastolic Reading', inputType: 'text' },
-        {  text: 'Pulse', inputType: 'text' },
+        { code: 'bm017', text: 'Systolic Reading', inputType: 'text', weight: },
+        { code: 'bm018', text: 'Diastolic Reading', inputType: 'text', weight: },
+        { code: 'bm019', text: 'Pulse', inputType: 'text', weight: }
       ],
     },
     {
       title: 'Grip Strength',
       items: [
-        {  text: 'Left Hand Measure', inputType: 'text' },
-        {  text: 'Right Hand Measure', inputType: 'text' },
+        {  code: 'bm028', text: 'Left Hand Measure', inputType: 'text' },
+        {  code: 'bm029', text: 'Right Hand Measure', inputType: 'text' },
       ],
     },
     {
