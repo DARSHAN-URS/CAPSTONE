@@ -11,7 +11,7 @@ export const subdomains = [
         },
         {
           code: 'mh007', // mh007, mh008corresponds to city and place
-          text: "Please mention LOcation you are present at: place and city",
+          text: "Please mention Location you are present at: place and city",
           inputType: 'text',
           benchmark: null, // Manual scoring needed for text field
         },
@@ -24,7 +24,7 @@ export const subdomains = [
         // Ask first
         {
           code: 'mh012_56',
-          text: 'Display a list of 10 words for 10 seconds. List as many words as you can remember.',
+          text: 'Display a list of 10 words for 10 seconds.  Enter how many words could the user recall.',
           inputType: 'text',
           benchmark: 4,
           
@@ -32,7 +32,7 @@ export const subdomains = [
         // Ask this question at the end
         {
           code: 'mh012_56',
-          text: 'List as many words as you can remember from the list shown in the beginning.',
+          text: 'Enter how many words could the user recall from the list shown in the beginning.',
           inputType: 'text',
           benchmark: 3,
           

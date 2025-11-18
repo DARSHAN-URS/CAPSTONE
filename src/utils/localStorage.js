@@ -86,8 +86,52 @@ export const calculateDomainScore = (domain, reports) => {
     return null; // No report or no answers, so no score
   }
 
-  const questions = getQuestionsForDomain(domain);
   const userAnswers = domainReport.answers;
+
+  // --- START: New Cognitive Scoring Logic ---
+  if (domain === 'cognitive') {
+    let totalWeightedScore = 0;
+    for (const subdomain of cognitiveQuestions) {
+      if (!subdomain.items || subdomain.items.length === 0) continue;
+
+      let subdomainScores = [];
+      for (const question of subdomain.items) {
+        if (!question.code) continue;
+
+        const userAnswer = userAnswers[question.code];
+        let questionScore = 0; // Default to 0 (incorrect)
+
+        if (question.benchmark === null) {
+          // Manual scoring for null benchmark
+          const manualScore = userAnswers[`${question.code}_score`];
+          if (manualScore === '1') {
+            questionScore = 1;
+          }
+        } else if (userAnswer !== undefined && userAnswer !== null && userAnswer !== '') {
+          // Automatic scoring based on benchmark
+          if (typeof question.benchmark === 'number') {
+            const numericAnswer = parseFloat(userAnswer);
+            if (!isNaN(numericAnswer) && numericAnswer >= question.benchmark) {
+              questionScore = 1;
+            }
+          } else if (typeof question.benchmark === 'string') {
+            if (String(userAnswer).trim().toLowerCase() === question.benchmark.trim().toLowerCase()) {
+              questionScore = 1;
+            }
+          }
+        }
+        subdomainScores.push(questionScore);
+      }
+
+      if (subdomainScores.length > 0) {
+        const averageSubdomainScore = subdomainScores.reduce((a, b) => a + b, 0) / subdomainScores.length;
+        totalWeightedScore += averageSubdomainScore * (subdomain.weight || 0);
+      }
+    }
+    return Math.round(totalWeightedScore * 100);
+  }
+  // --- END: New Cognitive Scoring Logic ---
+  const questions = getQuestionsForDomain(domain);
   let totalScore = 0;
 
   // --- START: Special exception for Mental Health scoring ---

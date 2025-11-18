@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { getDomainReports, calculateDomainScore } from '../utils/localStorage';
-import { db } from '../../firebaseConfig';
+// import { db } from '../../firebaseConfig';
 import { collection, addDoc } from "firebase/firestore";
 
 const styles = {

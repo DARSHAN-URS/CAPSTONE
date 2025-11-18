@@ -6,8 +6,6 @@ import { saveDomainReport, saveUser } from '../utils/localStorage';
 
 
 export const styles = {
-  radioInput: { width: '18px', height: '18px', cursor: 'pointer', accentColor: '#002147', margin: 0 },
-  subsection: { marginBottom: '24px' },
   appContainer: {
     minHeight: '100vh',
     display: 'flex',
@@ -249,6 +247,7 @@ const DomainAssessment = ({ domainName, domainTitle, questions = [], subdomains 
     navigate(`/questionnaire${queryString}`);
   };
 
+  // ...existing code...
   const roleForHeader = (domainName === 'physical' || domainName === 'mental') ? 'user' : 'assistant';
   const queryString = `?name=${encodeURIComponent(userName)}&id=${encodeURIComponent(userId)}&role=${roleForHeader}`;
 
@@ -409,6 +408,7 @@ const DomainAssessment = ({ domainName, domainTitle, questions = [], subdomains 
                         const text = isObject ? item.text : item;
                         const options = isObject ? (item.options || []) : [];
                         const inputType = isObject ? (item.inputType || (options.length > 0 ? 'radio' : 'text')) : 'text';
+                        const benchmark = isObject ? item.benchmark : undefined;
                         const keyId = code || `${sIdx}_${qIdx}`;
                         const answerKey = code ? code : `question_${sIdx}_${qIdx}`;
                         
@@ -454,6 +454,29 @@ const DomainAssessment = ({ domainName, domainTitle, questions = [], subdomains 
                                 style={styles.questionItemTextarea}
                                 disabled={isDisabled}
                               />
+                            )}
+                            {benchmark === null && code && (
+                              <div style={{ marginTop: '15px', background: '#f7f9fc', padding: '12px', borderRadius: '8px', border: '1px solid #e1e5e9' }}>
+                                <label style={{ fontWeight: 600, color: '#334155', fontSize: '0.9rem', display: 'block', marginBottom: '8px' }}>
+                                  Manual Score
+                                </label>
+                                <div style={styles.radioGroup}>
+                                  {['0', '1'].map(scoreValue => (
+                                    <label key={`${code}_score_${scoreValue}`} style={styles.radioLabel}>
+                                      <input
+                                        type="radio"
+                                        name={`${code}_score`}
+                                        value={scoreValue}
+                                        checked={answers[`${code}_score`] === scoreValue}
+                                        onChange={() => handleAnswerChange(`${code}_score`, scoreValue)}
+                                        style={styles.radioInput}
+                                        disabled={isDisabled}
+                                      />
+                                      <span>{scoreValue === '1' ? 'Correct' : 'Incorrect'}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
                             )}
                           </div>
                         );
@@ -505,5 +528,6 @@ const DomainAssessment = ({ domainName, domainTitle, questions = [], subdomains 
     </div>
   );
 };
+
 
 export default DomainAssessment;

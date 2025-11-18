@@ -2,9 +2,9 @@ export const subdomains = [
     {
       title: 'Blood Pressure',
       items: [
-        { code: 'bm017', text: 'Systolic Reading', inputType: 'text', weight: },
-        { code: 'bm018', text: 'Diastolic Reading', inputType: 'text', weight: },
-        { code: 'bm019', text: 'Pulse', inputType: 'text', weight: }
+        { code: 'bm017', text: 'Systolic Reading', inputType: 'text', weight:0.2 },
+        { code: 'bm018', text: 'Diastolic Reading', inputType: 'text', weight:0.1 },
+        { code: 'bm019', text: 'Pulse', inputType: 'text', weight:0.01 }
       ],
     },
     {
