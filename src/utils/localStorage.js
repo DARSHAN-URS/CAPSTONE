@@ -173,26 +173,25 @@ export const calculateDomainScore = (domain, reports) => {
       
       // We iterate through the questions (which contain the weights)
       // and match them to our converted 'wellness' scores.
-      // NOTE: Your biomarkersQuestions.js items MUST have 'code' matching the keys in convertedScores
-      // e.g., { code: 'hba1c_score', weight: 0.221970, ... }
       const questions = getQuestionsForDomain('biomarkers');
       
       for (const question of questions) {
-          const scoreKey = question.code; // e.g., 'hba1c_score'
-          if (convertedScores[scoreKey] !== undefined) {
-              // For ordinal scores (0-2), we might need to normalize to 0-1 before weighting
-              // or ensure the weight accounts for the scale. 
-              // Assuming weights expect the raw 0/1/2 value:
-              totalWeightedScore += convertedScores[scoreKey] * (question.weight || 0);
+          // --- START: FIX ---
+          // Use the 'scoreKey' from the question definition (e.g., 'bp_score')
+          // instead of the raw input 'code' (e.g., 'bm017').
+          const scoreKey = question.scoreKey; 
+          // --- END: FIX ---
+
+          if (scoreKey && convertedScores[scoreKey] !== undefined) {
+              // Only apply the weight if the question has one, to avoid double-counting.
+              if (question.weight > 0) {
+                totalWeightedScore += convertedScores[scoreKey] * question.weight;
+              }
           }
       }
       
-      // Normalize to 0-100. 
-      // You need to know the MAX possible weighted score to normalize correctly.
-      // For now, assuming the weights sum to ~1 and scores are roughly 0-1 range (or normalized).
-      // If scores are 0-2, the max is higher. 
-      // A simpler approach if weights sum to 1.0:
-      return Math.round(totalWeightedScore * 100); 
+      // The weights are designed to sum to 1, so multiplying by 100 gives the final score.
+      return Math.round(totalWeightedScore); 
   }
   // --- END: Biomarker Scoring Logic ---
 
@@ -284,6 +283,33 @@ export const calculateDomainScore = (domain, reports) => {
   }
 
   return Math.round(totalScore);
+};
+
+// --- NEW: Function to calculate the final weighted CAI score ---
+export const calculateCaiScore = (reports) => {
+  const domainWeights = {
+    physical: 0.317106,
+    cognitive: 0.262138,
+    biomarkers: 0.24342,
+    social: 0.177324,
+    // Note: The 'mental' domain is not included in the CAI weights provided.
+  };
+
+  let finalCaiScore = 0;
+
+  // Calculate score for each domain and apply its weight
+  for (const domain in domainWeights) {
+    const score = calculateDomainScore(domain, reports);
+    const weight = domainWeights[domain];
+
+    // If a score exists (is not null), add its weighted value to the final score.
+    // If a domain hasn't been assessed, its score will be null, and it won't contribute to the CAI.
+    if (score !== null) {
+      finalCaiScore += score * weight;
+    }
+  }
+
+  return Math.round(finalCaiScore);
 };
 
 export const generateSuggestions = (scores) => {

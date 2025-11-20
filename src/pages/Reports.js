@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { findUserById, getDomainReports, calculateDomainScore, generateSuggestions } from '../utils/localStorage';
+import { findUserById, getDomainReports, calculateDomainScore, calculateCaiScore, generateSuggestions } from '../utils/localStorage';
 // We no longer import the CSS file
 // import './Reports.css';
 
@@ -184,11 +184,8 @@ const Reports = () => {
 
     setScores(calculatedScores);
 
-    const domainCount = Object.values(calculatedScores).filter(s => s > 0).length;
-    const overall = domainCount > 0
-      ? Math.round(Object.values(calculatedScores).reduce((a, b) => a + b, 0) / domainCount)
-      : 0;
-    setOverallScore(overall);
+    const caiScore = calculateCaiScore(domainReports);
+    setOverallScore(caiScore);
 
     const generatedSuggestions = generateSuggestions(calculatedScores);
     setSuggestions(generatedSuggestions);
@@ -228,7 +225,7 @@ const Reports = () => {
 
         <div style={styles.reportSection}>
           <div style={styles.overallScore}>
-            <h2 style={styles.overallScoreH2}>Overall Health Score</h2>
+            <h2 style={styles.overallScoreH2}>Composite Ageing Index (CAI)</h2>
             <div style={styles.overallScoreValue}>{overallScore}</div>
             <div style={{ fontSize: '1.1rem', opacity: 0.9 }}>out of 100</div>
           </div>

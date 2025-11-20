@@ -6,7 +6,7 @@ export default defineConfig({
   // Add this section to fix the error
   esbuild: {
     loader: "jsx",
-    include: /src\/.*\.js$/,
+    include: /src\/.*\.jsx?$/,
     exclude: [],
   },
   server: {
