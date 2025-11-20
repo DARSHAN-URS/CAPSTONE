@@ -1,8 +1,8 @@
 import { subdomains as cognitiveQuestions } from '../data/cognitiveQuestions';
 import { subdomains as mentalQuestions } from '../data/mentalQuestions';
 import { subdomains as physicalQuestions } from '../data/physicalQuestions';
-// Assuming biomarkersQuestions.js will be created. If not, it will be handled.
-// import { subdomains as biomarkersQuestions } from '../data/biomarkersQuestions';
+// Assuming biomarkersQuestions is available or you pass the weights directly
+import { subdomains as biomarkersQuestions } from '../data/biomarkersQuestions';
 
 export const findUserById = (id) => {
   try {
@@ -67,15 +67,93 @@ const getQuestionsForDomain = (domain) => {
     case 'physical':
       questionData = physicalQuestions;
       break;
-    // case 'biomarkers':
-    //   questionData = biomarkersQuestions;
-    //   break;
+    case 'biomarkers':
+       questionData = biomarkersQuestions;
+       break;
     default:
       return [];
   }
   // Flatten the subdomains into a single list of questions
   return questionData.flatMap(subdomain => subdomain.items || []);
 };
+
+// --- NEW: Helper to convert raw biomarker inputs to wellness scores ---
+const convertBiomarkerInputs = (answers) => {
+  const scores = {};
+  const getVal = (key) => parseFloat(answers[key]);
+  const gender = answers['gender'] === 'Female' ? 2 : 1; // Default to Male (1) if not specified
+  // Note: Ideally 'age' should also be captured for lung function, defaulting to <60 logic here if missing.
+  
+  // 1. Blood Pressure (0-2)
+  const sys = getVal('bm017');
+  const dias = getVal('bm018');
+  if (!isNaN(sys) && !isNaN(dias)) {
+    if (sys < 120 && dias < 80) scores['bp_score'] = 2;
+    else if ((sys >= 120 && sys <= 139) || (dias >= 80 && dias <= 89)) scores['bp_score'] = 1;
+    else scores['bp_score'] = 0;
+  } else {
+      scores['bp_score'] = 0; // Default or handle missing
+  }
+
+  // 2. Pulse (0-1)
+  const pulse = getVal('bm019');
+  if (!isNaN(pulse)) {
+      scores['pulse_score'] = (pulse >= 60 && pulse <= 100) ? 1 : 0;
+  }
+
+  // 3. Grip Strength (0-1)
+  // Assuming inputs are max values or we take the provided single value
+  const grip = getVal('bm028'); // Simplification: using one input key for max grip
+  if (!isNaN(grip)) {
+      if (gender === 1) scores['grip_strength_score'] = grip >= 27 ? 1 : 0;
+      else scores['grip_strength_score'] = grip >= 18 ? 1 : 0;
+  }
+
+  // 4. Timed Walk (0-1)
+  const walkTime = getVal('bm056'); // Simplification: using one input key
+  if (!isNaN(walkTime)) {
+      scores['timed_walk_score'] = walkTime <= 6 ? 1 : 0;
+  }
+
+  // 5. Balance (0-1)
+  // Assuming input is "1" for Pass, "0" for Fail
+  const balance = getVal('bm049_iwer');
+  if (!isNaN(balance)) scores['passed_full_tandem'] = balance === 1 ? 1 : 0;
+
+  // 6. Anemia (0-1)
+  const hb = getVal('hb');
+  if (!isNaN(hb)) {
+      if (gender === 1) scores['anemia_score'] = (hb >= 13 && hb <= 16.5) ? 1 : 0;
+      else scores['anemia_score'] = (hb >= 12 && hb <= 16) ? 1 : 0;
+  }
+
+  // 7. HbA1c (0-1)
+  const hba1c = getVal('hba1c');
+  if (!isNaN(hba1c)) scores['hba1c_score'] = hba1c < 6.5 ? 1 : 0; // Strict cutoff
+
+  // 8. CRP (0-1)
+  const crp = getVal('crp');
+  if (!isNaN(crp)) scores['crp_score'] = crp < 3.0 ? 1 : 0; // Strict cutoff
+
+   // 9. Vision (0-2)
+   // Requires sophisticated logic for logMAR conversion. 
+   // For this frontend simplified version, we might assume pre-calculated or simplified input.
+   // Placeholder: if 'vision_impaired' is No (1) -> 2, else 0.
+   // You should expand this based on exact input fields available in your form.
+   scores['vision_score'] = 2; // Defaulting to normal for now, adapt to inputs
+
+  // 10. WHR (0-1)
+  const waist = getVal('bm076');
+  const hip = getVal('bm079');
+  if (!isNaN(waist) && !isNaN(hip) && hip !== 0) {
+      const whr = waist / hip;
+      if (gender === 1) scores['whr_score'] = whr < 0.90 ? 1 : 0;
+      else scores['whr_score'] = whr < 0.85 ? 1 : 0;
+  }
+
+  return scores;
+};
+
 
 export const calculateDomainScore = (domain, reports) => {
   const domainReport = reports
@@ -88,7 +166,37 @@ export const calculateDomainScore = (domain, reports) => {
 
   const userAnswers = domainReport.answers;
 
-  // --- START: New Cognitive Scoring Logic ---
+  // --- START: Biomarker Scoring Logic ---
+  if (domain === 'biomarkers') {
+      const convertedScores = convertBiomarkerInputs(userAnswers);
+      let totalWeightedScore = 0;
+      
+      // We iterate through the questions (which contain the weights)
+      // and match them to our converted 'wellness' scores.
+      // NOTE: Your biomarkersQuestions.js items MUST have 'code' matching the keys in convertedScores
+      // e.g., { code: 'hba1c_score', weight: 0.221970, ... }
+      const questions = getQuestionsForDomain('biomarkers');
+      
+      for (const question of questions) {
+          const scoreKey = question.code; // e.g., 'hba1c_score'
+          if (convertedScores[scoreKey] !== undefined) {
+              // For ordinal scores (0-2), we might need to normalize to 0-1 before weighting
+              // or ensure the weight accounts for the scale. 
+              // Assuming weights expect the raw 0/1/2 value:
+              totalWeightedScore += convertedScores[scoreKey] * (question.weight || 0);
+          }
+      }
+      
+      // Normalize to 0-100. 
+      // You need to know the MAX possible weighted score to normalize correctly.
+      // For now, assuming the weights sum to ~1 and scores are roughly 0-1 range (or normalized).
+      // If scores are 0-2, the max is higher. 
+      // A simpler approach if weights sum to 1.0:
+      return Math.round(totalWeightedScore * 100); 
+  }
+  // --- END: Biomarker Scoring Logic ---
+
+  // --- START: Cognitive Scoring Logic (Existing) ---
   if (domain === 'cognitive') {
     let totalWeightedScore = 0;
     for (const subdomain of cognitiveQuestions) {
@@ -130,57 +238,48 @@ export const calculateDomainScore = (domain, reports) => {
     }
     return Math.round(totalWeightedScore * 100);
   }
-  // --- END: New Cognitive Scoring Logic ---
+  // --- END: Cognitive Scoring Logic ---
+
+  // --- Standard Logic for Mental & Physical (unchanged) ---
   const questions = getQuestionsForDomain(domain);
   let totalScore = 0;
 
-  // --- START: Special exception for Mental Health scoring ---
   const mentalWellbeingCodes = ['mh201', 'mh202', 'mh204', 'mh205', 'mh208', 'mh209', 'mh210', 'mh206', 'mh207'];
   const mh201Answer = userAnswers['mh201'];
   const isMentalHealthSkip = domain === 'mental' && mh201Answer?.toLowerCase() === 'no';
 
   if (isMentalHealthSkip) {
-    // Find all questions related to mental well-being
     const mentalWellbeingQuestions = questions.filter(q => mentalWellbeingCodes.includes(q.code));
-    // Add the sum of their weights directly to the score
     const bonusScore = mentalWellbeingQuestions.reduce((sum, q) => sum + (q.weight || 0), 0);
     totalScore += bonusScore;
   }
-  // --- END: Special exception ---
 
-  // Loop through every question for the domain
   for (const question of questions) {
-    // If the mental health exception was applied, skip those questions in the loop
     if (isMentalHealthSkip && mentalWellbeingCodes.includes(question.code)) {
       continue;
     }
 
-    // Ensure the question has a code, benchmark, and weight to be scored
     if (!question.code || question.benchmark === undefined || question.weight === undefined) {
       continue;
     }
 
     const userAnswer = userAnswers[question.code];
-    let questionScore = 0; // Default score is 0 (incorrect)
+    let questionScore = 0; 
 
-    // Check if user provided a valid answer
     if (userAnswer !== undefined && userAnswer !== null && userAnswer !== '') {
-      // For numeric benchmarks (e.g., benchmark: 8)
       if (typeof question.benchmark === 'number') {
         const numericAnswer = parseFloat(userAnswer);
         if (!isNaN(numericAnswer) && numericAnswer >= question.benchmark) {
-          questionScore = 1; // Score is 1 if answer is >= benchmark
+          questionScore = 1; 
         }
       }
-      // For string benchmarks (e.g., benchmark: 'No')
       else if (typeof question.benchmark === 'string') {
         if (String(userAnswer).trim().toLowerCase() === question.benchmark.trim().toLowerCase()) {
-          questionScore = 1; // Score is 1 if answer matches benchmark
+          questionScore = 1; 
         }
       }
     }
 
-    // Add the weighted score for this question to the total
     totalScore += questionScore * question.weight;
   }
 

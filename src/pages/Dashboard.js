@@ -141,8 +141,9 @@ const Dashboard = () => {
       const cognitiveScore = calculateDomainScore('cognitive', reports);
       const mentalScore = calculateDomainScore('mental', reports);
       const physicalScore = calculateDomainScore('physical', reports);
+      const biomarkerScore = calculateDomainScore('biomarkers', reports);
       
-      const scores = { cognitiveScore, mentalScore, physicalScore };
+      const scores = { cognitiveScore, mentalScore, physicalScore, biomarkerScore };
       const validScores = Object.values(scores).filter(s => s !== null);
 
       // 3. Only proceed if there are scores to save
@@ -157,6 +158,7 @@ const Dashboard = () => {
           cognitiveScore,
           mentalScore,
           physicalScore,
+          biomarkerScore,
           caiScore,
           assessmentDate: new Date(),
         };

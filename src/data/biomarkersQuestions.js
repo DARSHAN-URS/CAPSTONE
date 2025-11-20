@@ -1,70 +1,170 @@
 export const subdomains = [
-    {
-      title: 'Blood Pressure',
-      items: [
-        { code: 'bm017', text: 'Systolic Reading', inputType: 'text', weight:0.2 },
-        { code: 'bm018', text: 'Diastolic Reading', inputType: 'text', weight:0.1 },
-        { code: 'bm019', text: 'Pulse', inputType: 'text', weight:0.01 }
-      ],
-    },
-    {
-      title: 'Grip Strength',
-      items: [
-        {  code: 'bm028', text: 'Left Hand Measure', inputType: 'text' },
-        {  code: 'bm029', text: 'Right Hand Measure', inputType: 'text' },
-      ],
-    },
-    {
-      title: 'Balance',
-      items: [
-        {  text: 'Completed semi tandem for 10 sec', inputType: 'text' },
-        {  text: 'Completed side by side for 10 sec', inputType: 'text' },
-        {  text: 'Completed full tandem for 30/60 sec', inputType: 'text' },
-      ],
-    },
-    {
-      title: 'Timed Walk',
-      items: [
-        {  text: 'Walking speed time', inputType: 'text' },
-      ],
-    },
-    {
-      title: 'Vision Tests',
-      items: [
-        {  text: 'Left eye vision', inputType: 'radio', options: ['0. No', '1. Yes'] },
-        {  text: 'Right eye vision', inputType: 'radio', options: ['0. No', '1. Yes'] },
-      ],
-    },
-    {
-      title: 'Distance/Near Vision',
-      items: [
-        {  text: 'Left eye distance vision', inputType: 'text' },
-        {  text: 'Right eye near vision', inputType: 'text' },
-      ],
-    },
-    {
-      title: 'Anthropometry',
-      items: [
-        {  text: 'Height', inputType: 'text' },
-        {  text: 'Weight', inputType: 'text' },
-        {  text: 'Waist Measurement', inputType: 'text' },
-        {  text: 'Hip Measurement', inputType: 'text' },
-      ],
-    },
-    {
-      title: 'Lung Function Test',
-      items: [
-        { code: 'fev1fvc', text: 'FEV1/FVC Ratio', inputType: 'text' },
-        { code: 'pre_fvc_gli', text: 'Predicted FVC (GLI)', inputType: 'text' },
-        { code: 'repeatable', text: 'If test was repeatable', inputType: 'text' },
-      ],
-    },
-    {
-      title: 'Dried Blood Spot Test',
-      items: [
-        { code: 'hb', text: 'Hemoglobin', inputType: 'text' },
-        { code: 'hba1c', text: 'Glycated Hemoglobin (HbA1c)', inputType: 'text' },
-        { code: 'crp', text: 'C-Reactive Protein', inputType: 'text' },
-      ],
-    },
-  ];
+  {
+    title: 'Blood Pressure',
+    items: [
+      { 
+        code: 'bm017', 
+        text: 'Systolic Reading (mmHg)', 
+        inputType: 'number', 
+        scoreKey: 'bp_score', 
+        weight: 0.166645 // Weight assigned to BP Score
+      },
+      { 
+        code: 'bm018', 
+        text: 'Diastolic Reading (mmHg)', 
+        inputType: 'number', 
+        scoreKey: 'bp_score', 
+        weight: 0 // Weight already handled by bm017
+      }
+    ],
+  },
+  {
+    title: 'Pulse',
+    items: [
+      { 
+        code: 'bm019', 
+        text: 'Pulse (bpm)', 
+        inputType: 'number', 
+        scoreKey: 'pulse_score', 
+        weight: 0.007350 
+      }
+    ],
+  },
+  {
+    title: 'Grip Strength',
+    items: [
+      { 
+        code: 'bm028', 
+        text: 'Left Hand Measure (kg)', 
+        inputType: 'number', 
+        scoreKey: 'grip_strength_score', 
+        weight: 0.184709 
+      },
+      { 
+        code: 'bm029', 
+        text: 'Right Hand Measure (kg)', 
+        inputType: 'number', 
+        scoreKey: 'grip_strength_score', 
+        weight: 0 
+      },
+    ],
+  },
+  {
+    title: 'Balance',
+    items: [
+      // Semi-tandem and Side-by-Side removed as per model
+      { 
+        code: 'bm049_iwer', 
+        text: 'Completed full tandem stand for 30/60 sec?', 
+        inputType: 'radio', 
+        options: [{label: 'Yes', value: '1'}, {label: 'No', value: '0'}],
+        scoreKey: 'passed_full_tandem', 
+        weight: 0.007604 
+      },
+    ],
+  },
+  {
+    title: 'Timed Walk',
+    items: [
+      { 
+        code: 'bm056', 
+        text: 'Walking speed time (seconds)', 
+        inputType: 'number', 
+        scoreKey: 'timed_walk_score', 
+        weight: 0.050142 
+      },
+    ],
+  },
+  {
+    title: 'Vision Tests',
+    items: [
+      { 
+        code: 'bm060a', 
+        text: 'Left eye vision test passed?', 
+        inputType: 'radio', 
+        options: [{label: 'Yes', value: '1'}, {label: 'No', value: '0'}],
+        scoreKey: 'vision_score',
+        weight: 0 
+      },
+      { 
+        code: 'bm060b', 
+        text: 'Right eye vision test passed?', 
+        inputType: 'radio', 
+        options: [{label: 'Yes', value: '1'}, {label: 'No', value: '0'}],
+        scoreKey: 'vision_score',
+        weight: 0 
+      },
+      { 
+        code: 'bm061', 
+        text: 'Left eye distance vision (e.g., 20/40)', 
+        inputType: 'text',
+        scoreKey: 'vision_score',
+        weight: 0.128609 // Weight assigned to Vision Score
+      },
+      { 
+        code: 'bm063', 
+        text: 'Left eye near vision (e.g., 20/40)', 
+        inputType: 'text',
+        scoreKey: 'vision_score',
+        weight: 0 
+      },
+      // Add bm062/bm064 if you collect right eye specifics, 
+      // but weight sits on the primary input to avoid double counting.
+    ],
+  },
+  {
+    title: 'Anthropometry (Waist-to-Hip)',
+    items: [
+      // Height/Weight removed as BMI was excluded
+      { 
+        code: 'bm076', 
+        text: 'Waist Measurement (cm)', 
+        inputType: 'number', 
+        scoreKey: 'whr_score', 
+        weight: 0.310491 
+      },
+      { 
+        code: 'bm079', 
+        text: 'Hip Measurement (cm)', 
+        inputType: 'number', 
+        scoreKey: 'whr_score', 
+        weight: 0 
+      },
+    ],
+  },
+  // Lung Function removed as per previous instructions
+  {
+    title: 'Dried Blood Spot Test',
+    items: [
+      { 
+        code: 'hb', 
+        text: 'Hemoglobin (g/dL)', 
+        inputType: 'number', 
+        scoreKey: 'anemia_score', 
+        weight: 0.006672 
+      },
+      { 
+        code: 'hba1c', 
+        text: 'Glycated Hemoglobin (HbA1c %)', 
+        inputType: 'number', 
+        scoreKey: 'hba1c_score', 
+        weight: 0.135019 
+      },
+      { 
+        code: 'crp', 
+        text: 'C-Reactive Protein (mg/L)', 
+        inputType: 'number', 
+        scoreKey: 'crp_score', 
+        weight: 0.002758 
+      },
+    ],
+  },
+  {
+     title: 'Demographics (Required for Scoring)',
+     items: [
+       { code: 'gender', text: 'Gender', inputType: 'radio', options: ['Male', 'Female'], weight: 0 },
+       // Age is less critical now without Lung Function, but good to keep
+       { code: 'age', text: 'Age', inputType: 'number', weight: 0 }
+     ]
+  }
+];
