@@ -7,7 +7,7 @@ export const subdomains = [
         text: 'Systolic Reading (mmHg)', 
         inputType: 'number', 
         scoreKey: 'bp_score', 
-        weight: 16.6645 // Weight assigned to BP Score
+        weight: 3.7910 // Weight assigned to BP Score
       },
       { 
         code: 'bm018', 
@@ -26,7 +26,7 @@ export const subdomains = [
         text: 'Pulse (bpm)', 
         inputType: 'number', 
         scoreKey: 'pulse_score', 
-        weight: 0.7350 
+        weight: 3.4844
       }
     ],
   },
@@ -38,10 +38,10 @@ export const subdomains = [
         text: 'Left Hand Measure (kg)', 
         inputType: 'number', 
         scoreKey: 'grip_strength_score', 
-        weight: 18.4709 
+        weight: 13.8644
       },
       { 
-        code: 'bm029', 
+        code: 'b029', 
         text: 'Right Hand Measure (kg)', 
         inputType: 'number', 
         scoreKey: 'grip_strength_score', 
@@ -59,7 +59,7 @@ export const subdomains = [
         inputType: 'radio', 
         options: [{label: 'Yes', value: '1'}, {label: 'No', value: '0'}],
         scoreKey: 'passed_full_tandem', 
-        weight: 0.7604 
+        weight: 3.8980
       },
     ],
   },
@@ -71,7 +71,7 @@ export const subdomains = [
         text: 'Walking speed time (seconds)', 
         inputType: 'number', 
         scoreKey: 'timed_walk_score', 
-        weight: 5.0142 
+        weight: 28.6259
       },
     ],
   },
@@ -99,7 +99,7 @@ export const subdomains = [
         text: 'Left eye distance vision (e.g., 20/40)', 
         inputType: 'text',
         scoreKey: 'vision_score',
-        weight: 12.8609 // Weight assigned to Vision Score
+        weight: 7.0818 // Weight assigned to Vision Score
       },
       { 
         code: 'bm063', 
@@ -121,7 +121,7 @@ export const subdomains = [
         text: 'Waist Measurement (cm)', 
         inputType: 'number', 
         scoreKey: 'whr_score', 
-        weight: 31.0491 
+        weight: 4.0912
       },
       { 
         code: 'bm079', 
@@ -141,21 +141,21 @@ export const subdomains = [
         text: 'Hemoglobin (g/dL)', 
         inputType: 'number', 
         scoreKey: 'anemia_score', 
-        weight: 0.6672 
+        weight: 0.5603
       },
       { 
         code: 'hba1c', 
         text: 'Glycated Hemoglobin (HbA1c %)', 
         inputType: 'number', 
         scoreKey: 'hba1c_score', 
-        weight: 13.5019 
+        weight: 22.1970
       },
       { 
         code: 'crp', 
         text: 'C-Reactive Protein (mg/L)', 
         inputType: 'number', 
         scoreKey: 'crp_score', 
-        weight: 0.2758 
+        weight: 12.4060
       },
     ],
   },
