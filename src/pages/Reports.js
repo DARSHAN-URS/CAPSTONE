@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { findUserById, getDomainReports, calculateDomainScore, calculateCaiScore, generateSuggestions } from '../utils/localStorage';
+import { db } from '../../firebaseConfig';
+import { collection, addDoc } from "firebase/firestore";
 // We no longer import the CSS file
 // import './Reports.css';
 
@@ -137,6 +139,30 @@ const styles = {
     color: '#002147',
     fontWeight: '600',
   },
+  saveButton: {
+    width: '100%',
+    padding: '12px',
+    fontSize: '1rem',
+    fontWeight: 600,
+    color: 'white',
+    background: 'linear-gradient(135deg, #1e90ff 0%, #007bff 100%)',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.3s',
+  },
+  saveMessage: {
+    marginTop: '10px',
+    textAlign: 'center',
+    fontSize: '0.9rem',
+    fontWeight: 500,
+  },
+  saveActionContainer: {
+    marginTop: '30px',
+    paddingTop: '20px',
+    borderTop: '2px solid #f0f4f8',
+    maxWidth: '350px',
+  },
 };
 
 
@@ -153,6 +179,8 @@ const Reports = () => {
   });
   const [overallScore, setOverallScore] = useState(0);
   const [suggestions, setSuggestions] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
 
   useEffect(() => {
     const id = searchParams.get('id') || localStorage.getItem('selectedUserId');
@@ -190,6 +218,41 @@ const Reports = () => {
     const generatedSuggestions = generateSuggestions(calculatedScores);
     setSuggestions(generatedSuggestions);
   }, [searchParams]);
+
+  const handleSaveToDB = async () => {
+    if (!userId || userId === 'N/A') {
+      setSaveMessage('Cannot save. No active user ID.');
+      setTimeout(() => setSaveMessage(''), 3000);
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveMessage('');
+
+    const reportData = {
+      userId,
+      userName,
+      physicalScore: scores.physical,
+      mentalScore: scores.mental,
+      cognitiveScore: scores.cognitive,
+      biomarkersScore: scores.biomarkers,
+      caiScore: overallScore,
+      assessmentDate: new Date(),
+    };
+
+    try {
+      // Use addDoc to create a new document with a unique ID in the "reports" collection
+      const docRef = await addDoc(collection(db, "reports"), reportData);
+      console.log("Report saved with ID: ", docRef.id);
+      setSaveMessage('Successfully saved report to cloud!');
+    } catch (error) {
+      console.error("Error saving report: ", error);
+      setSaveMessage('Failed to save. See console for details.');
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setSaveMessage(''), 4000);
+    }
+  };
 
   const queryString = `?name=${encodeURIComponent(userName)}&id=${encodeURIComponent(userId)}`;
 
@@ -263,7 +326,19 @@ const Reports = () => {
               </div>
             </div>
           </div>
+        <div style={styles.saveActionContainer}>
+            <button
+              onClick={handleSaveToDB}
+              disabled={isSaving || !userId || userId === 'N/A'}
+              style={{ ...styles.saveButton, opacity: (isSaving || !userId || userId === 'N/A') ? 0.6 : 1 }}
+            >
+              {isSaving ? 'Saving...' : 'Save This Report to Cloud'}
+            </button>
+            {saveMessage && <p style={styles.saveMessage}>{saveMessage}</p>}
+          </div>
+          {/* --- END: Save button moved here --- */}
         </div>
+        
 
         {suggestions.length > 0 && (
           <div style={styles.reportSection}>

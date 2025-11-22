@@ -7,7 +7,7 @@ export const subdomains = [
         text: 'Systolic Reading (mmHg)', 
         inputType: 'number', 
         scoreKey: 'bp_score', 
-        weight: 0.166645 // Weight assigned to BP Score
+        weight: 16.6645 // Weight assigned to BP Score
       },
       { 
         code: 'bm018', 
@@ -26,7 +26,7 @@ export const subdomains = [
         text: 'Pulse (bpm)', 
         inputType: 'number', 
         scoreKey: 'pulse_score', 
-        weight: 0.007350 
+        weight: 0.7350 
       }
     ],
   },
@@ -38,7 +38,7 @@ export const subdomains = [
         text: 'Left Hand Measure (kg)', 
         inputType: 'number', 
         scoreKey: 'grip_strength_score', 
-        weight: 0.184709 
+        weight: 18.4709 
       },
       { 
         code: 'bm029', 
@@ -59,7 +59,7 @@ export const subdomains = [
         inputType: 'radio', 
         options: [{label: 'Yes', value: '1'}, {label: 'No', value: '0'}],
         scoreKey: 'passed_full_tandem', 
-        weight: 0.007604 
+        weight: 0.7604 
       },
     ],
   },
@@ -71,7 +71,7 @@ export const subdomains = [
         text: 'Walking speed time (seconds)', 
         inputType: 'number', 
         scoreKey: 'timed_walk_score', 
-        weight: 0.050142 
+        weight: 5.0142 
       },
     ],
   },
@@ -99,7 +99,7 @@ export const subdomains = [
         text: 'Left eye distance vision (e.g., 20/40)', 
         inputType: 'text',
         scoreKey: 'vision_score',
-        weight: 0.128609 // Weight assigned to Vision Score
+        weight: 12.8609 // Weight assigned to Vision Score
       },
       { 
         code: 'bm063', 
@@ -121,7 +121,7 @@ export const subdomains = [
         text: 'Waist Measurement (cm)', 
         inputType: 'number', 
         scoreKey: 'whr_score', 
-        weight: 0.310491 
+        weight: 31.0491 
       },
       { 
         code: 'bm079', 
@@ -141,21 +141,21 @@ export const subdomains = [
         text: 'Hemoglobin (g/dL)', 
         inputType: 'number', 
         scoreKey: 'anemia_score', 
-        weight: 0.006672 
+        weight: 0.6672 
       },
       { 
         code: 'hba1c', 
         text: 'Glycated Hemoglobin (HbA1c %)', 
         inputType: 'number', 
         scoreKey: 'hba1c_score', 
-        weight: 0.135019 
+        weight: 13.5019 
       },
       { 
         code: 'crp', 
         text: 'C-Reactive Protein (mg/L)', 
         inputType: 'number', 
         scoreKey: 'crp_score', 
-        weight: 0.002758 
+        weight: 0.2758 
       },
     ],
   },

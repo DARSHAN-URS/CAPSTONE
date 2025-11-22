@@ -235,7 +235,7 @@ export const calculateDomainScore = (domain, reports) => {
         totalWeightedScore += averageSubdomainScore * (subdomain.weight || 0);
       }
     }
-    return Math.round(totalWeightedScore * 100);
+    return Math.round(totalWeightedScore);
   }
   // --- END: Cognitive Scoring Logic ---
 
@@ -291,8 +291,7 @@ export const calculateCaiScore = (reports) => {
     physical: 0.317106,
     cognitive: 0.262138,
     biomarkers: 0.24342,
-    social: 0.177324,
-    // Note: The 'mental' domain is not included in the CAI weights provided.
+    mental: 0.177324,
   };
 
   let finalCaiScore = 0;

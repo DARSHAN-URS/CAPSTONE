@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { getDomainReports, calculateDomainScore } from '../utils/localStorage';
-// import { db } from '../../firebaseConfig';
-import { collection, addDoc } from "firebase/firestore";
+
 
 const styles = {
   appContainer: {
@@ -131,51 +129,6 @@ const Dashboard = () => {
     
     localStorage.setItem('selectedUserId', id);
     localStorage.setItem('selectedUserName', name);
-
-    // Logic to calculate and save scores automatically
-    if (id && id !== 'N/A') {
-      // 1. Get all reports from local storage for the current user
-      const reports = getDomainReports(id);
-
-      // 2. Calculate scores for each domain
-      const cognitiveScore = calculateDomainScore('cognitive', reports);
-      const mentalScore = calculateDomainScore('mental', reports);
-      const physicalScore = calculateDomainScore('physical', reports);
-      const biomarkerScore = calculateDomainScore('biomarkers', reports);
-      
-      const scores = { cognitiveScore, mentalScore, physicalScore, biomarkerScore };
-      const validScores = Object.values(scores).filter(s => s !== null);
-
-      // 3. Only proceed if there are scores to save
-      if (validScores.length > 0) {
-        const total = validScores.reduce((sum, score) => sum + score, 0);
-        const caiScore = Math.round(total / validScores.length);
-
-        // 4. Prepare the data object for Firebase
-        const reportData = {
-          userId: id,
-          userName: name,
-          cognitiveScore,
-          mentalScore,
-          physicalScore,
-          biomarkerScore,
-          caiScore,
-          assessmentDate: new Date(),
-        };
-
-        // 5. Save the new report to the 'reports' collection in Firebase
-        const saveReport = async () => {
-          try {
-            const docRef = await addDoc(collection(db, "reports"), reportData);
-            console.log("New assessment report saved to Firebase with ID: ", docRef.id);
-          } catch (error) {
-            console.error("Error auto-saving report to Firebase: ", error);
-          }
-        };
-
-        saveReport();
-      }
-    }
   }, [searchParams]);
 
   const handleStartAssessment = () => {
@@ -197,7 +150,7 @@ const Dashboard = () => {
         <div style={styles.heroSection}>
           <div style={styles.heroContent}>
             <div style={styles.welcomeBadge}>User Dashboard</div>
-            <h1 style={styles.heroTitle}>Welcome Back</h1>
+            <h1 style={styles.heroTitle}>Welcome Back, {userName}</h1>
             <p style={styles.heroSubtitle}>
               Comprehensive health assessment and monitoring system
             </p>

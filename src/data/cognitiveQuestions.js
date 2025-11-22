@@ -16,7 +16,7 @@ export const subdomains = [
           benchmark: null, // Manual scoring needed for text field
         },
       ],
-      weight: 0.265729,
+      weight: 26.5729,
     },
     {
       title: 'Word Recall',
@@ -38,7 +38,7 @@ export const subdomains = [
           
         }, // mh012_56 is calculated after both questions are answered.
       ],
-      weight: 0.204194,
+      weight: 20.4194,
     },
     // NO MORE VERBAL FLUENCY: rita thinks its trash
     {
@@ -61,7 +61,7 @@ export const subdomains = [
           benchmark: 'Answered correctly',
         },
       ],
-      weight: 0.142491,
+      weight: 14.2491,
     },
     {
       title: 'Arithematic Questions',
@@ -100,7 +100,7 @@ export const subdomains = [
           
         },
       ],
-      weight: 0.260725,
+      weight: 26.0725,
     },
     
     {  
@@ -123,6 +123,6 @@ export const subdomains = [
           benchmark: 'Followed correctly',
         },
       ],
-      weight: 0.126862,
+      weight: 12.6862,
     },
   ];
